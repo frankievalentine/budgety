@@ -172,6 +172,36 @@ var UIController = (function() {
         expensesPercLabel: '.item__percentage'
     };
 
+    // Private function to format number
+    var formatNumber = function(num, type) {
+            var numSplit, int, dec, type;
+
+            // + or - before num exactly 2 decimal points comma seperating thousands
+            // 2310.4567 -> + 2,310.46
+            // Overrides num argument to Math.abs | removes sign of number
+            num = Math.abs(num);
+
+            // num.toFixed is a method of the number prototype always puts 2 decimals on the num
+            // (2.4567).toFixed(2) -> "2.46"
+            num = num.toFixed(2);
+
+            // Divide num into integer part and decimal part stored in an array
+            // int.length is how many numbers we have in the string containing num
+            // 2000 = 4 length
+            numSplit = num.split('.')
+            int = numSplit[0];
+            if (int.length > 3) {
+                // Substring returns part of string we want (pos, read)
+                int = int.substr(0, int.length - 3) + ',' + int.substr(int.length - 3, 3); // 2310 = 2,310
+            }
+
+            dec = numSplit[1];
+
+            // Returned first, since parentheses, if type is 'exp' then sign is - if not sign is +
+            // Returned second int formatted with comma and finally decimal
+            return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
+        };
+
     // Public function that iffy returns with object assigned to UIController
     return {
         getInput: function() {
@@ -197,7 +227,7 @@ var UIController = (function() {
             newHtml = html.replace('%id%', obj.id);
             // newHtml is now the id
             newHtml = newHtml.replace('%description%', obj.description);
-            newHtml = newHtml.replace('%value%', obj.value);
+            newHtml = newHtml.replace('%value%', formatNumber(obj.value, type));
 
             // Insert HTML into DOM (using incertAdjacent method)
             // Child's of income__list and expense__list
@@ -226,10 +256,13 @@ var UIController = (function() {
         },
 
         displayBudget: function(obj) {
+            var type;
+            obj.budget > 0 ? type = 'inc' : type = 'exp';
+
             // print 4 peices of data DOM manipulation
-            document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
-            document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
-            document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+            document.querySelector(DOMstrings.budgetLabel).textContent = formatNumber(obj.budget, type);
+            document.querySelector(DOMstrings.incomeLabel).textContent = formatNumber(obj.totalInc, 'inc');
+            document.querySelector(DOMstrings.expensesLabel).textContent = formatNumber(obj.totalExp, 'exp');
             
             // Show the user the percentage if greater than 0 or dashes when not
             if (obj.percentage > 0) {
