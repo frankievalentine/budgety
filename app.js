@@ -7,7 +7,23 @@ var budgetController = (function() {
         this.id = id;
         this.description = description;
         this.value = value;
-    }
+        this.percentage = -1;
+    };
+
+    // Adding calcPercentage object to the Expense prototype
+    // Specific function to calculate totalIncome parameter > 0
+    Expense.prototype.calcPercentage = function(totalIncome) {
+        if (totalIncome > 0) {
+            this.percentage = Math.round(this.value / totalIncome * 100);
+        } else {
+            this.percentage = -1;
+        }
+    };
+
+    // Return the percentage calculated
+    Expense.prototype.getPercentage = function() {
+        return this.percentage;
+    };
 
     var Income = function(id, description, value) {
         this.id = id;
@@ -105,6 +121,21 @@ var budgetController = (function() {
             }
         },
 
+        calculatePercentages: function() {
+            // Loop over expenses and use current calculated percentage
+            data.allItems.exp.forEach(function(cur) {
+                cur.calcPercentage(data.totals.inc);
+            });
+        },
+
+        // Return calc percentages and store
+        getPercentages: function() {
+            var allPerc = data.allItems.exp.map(function(cur) {
+                return cur.getPercentage();
+            });
+            return allPerc;
+        },
+
         getBudget: function() {
             return {
                 budget: data.budget,
@@ -137,7 +168,8 @@ var UIController = (function() {
         incomeLabel: '.budget__income--value',
         expensesLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
-        container: '.container'
+        container: '.container',
+        expensesPercLabel: '.item__percentage'
     };
 
     // Public function that iffy returns with object assigned to UIController
@@ -207,6 +239,27 @@ var UIController = (function() {
             }
         },
 
+        displayPercentages: function(percentages) {
+            // Returns nodeList by selecting all and contains a length property
+            var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
+
+            // For loop in each iteration calls the callback function 
+            var nodeListForEach = function(list, callback) {
+                  for (var i = 0; i < list.length; i++) {
+                      callback(list[i], i);
+                  }
+            };
+
+            // nodeListForEach function is passed into the callback parameter
+            nodeListForEach(fields, function(current, index) {
+                if (percentages[index] > 0) {
+                    current.textContent = percentages[index] + "%";
+                } else {
+                    current.textContent = percentages[index] + "---";
+                }
+            });
+        },
+
         // Expose selector strings to global scope
         getDOMstrings: function() {
             return DOMstrings;
@@ -243,7 +296,19 @@ var controller = (function(budgetCtrl, UICtrl) {
         var budget = budgetCtrl.getBudget();
         // Display returned budget object (above) to UI
         UICtrl.displayBudget(budget);
-    }
+    };
+
+    var updatePercentages = function() {
+
+        // Calculate percentages
+        budgetCtrl.calculatePercentages();
+
+        // Read from budget controller
+        var percentages = budgetCtrl.getPercentages();
+
+        // Update UI with new percentages
+        UICtrl.displayPercentages(percentages);
+    };
 
     // Used in both event listeners, requires seperate function
     var ctrlAddItem = function() {
@@ -265,6 +330,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
             // Calculate and update budget
             updateBudget();
+
+            // Caclulate and update percentages
+            updatePercentages();
         }
     };
 
@@ -290,6 +358,9 @@ var controller = (function(budgetCtrl, UICtrl) {
 
             // Update and show new budget
             updateBudget();
+
+            // Caclulate and update percentages
+            updatePercentages();
         }
     };
 
@@ -306,8 +377,8 @@ var controller = (function(budgetCtrl, UICtrl) {
             // Start event listeners
             setupEventListeners();
         }
-    }
+    };
 })(budgetController, UIController);
 
-// Call the setupEventListeners object
+// Call the controller.init object containing reset budget and event listeners
 controller.init();
