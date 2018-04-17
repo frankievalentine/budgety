@@ -169,7 +169,8 @@ var UIController = (function() {
         expensesLabel: '.budget__expenses--value',
         percentageLabel: '.budget__expenses--percentage',
         container: '.container',
-        expensesPercLabel: '.item__percentage'
+        expensesPercLabel: '.item__percentage',
+        dateLabel: '.budget__title--month'
     };
 
     // Private function to format number
@@ -293,6 +294,21 @@ var UIController = (function() {
             });
         },
 
+        // Date object constructor
+        displayMonth: function() {
+            var now, months, month, year;
+
+            now = new Date();
+            // var christmas = new Date(2018, 12, 25)
+
+            months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'November', 'December'];
+            month = now.getMonth(); // gives month number : zero based
+            year = now.getFullYear(); // gets current full year
+
+            // months[month] index gives getMonth number and lists what month aligns with index
+            document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
+        },
+
         // Expose selector strings to global scope
         getDOMstrings: function() {
             return DOMstrings;
@@ -401,6 +417,7 @@ var controller = (function(budgetCtrl, UICtrl) {
     return {
         init: function() {
             // Set budget to 0
+            UICtrl.displayMonth();
             UICtrl.displayBudget({
                 budget: 0,
                 totalInc: 0,
@@ -413,5 +430,5 @@ var controller = (function(budgetCtrl, UICtrl) {
     };
 })(budgetController, UIController);
 
-// Call the controller.init object containing reset budget and event listeners
+// Call the controller.init object containing reset budget, event listeners, and date
 controller.init();
