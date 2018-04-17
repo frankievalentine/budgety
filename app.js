@@ -113,8 +113,12 @@ var UIController = (function() {
         inputValue: '.add__value',
         inputBtn: '.add__btn',
         incomeContainer: '.income__list',
-        expensesContainer: '.expenses__list'
-    }
+        expensesContainer: '.expenses__list',
+        budgetLabel: '.budget__value',
+        incomeLabel: '.budget__income--value',
+        expensesLabel: '.budget__expenses--value',
+        percentageLabel: '.budget__expenses--percentage'
+    };
 
     // Public function that iffy returns with object assigned to UIController
     return {
@@ -124,10 +128,6 @@ var UIController = (function() {
                     description: document.querySelector(DOMstrings.inputDescription).value,
                     value: parseFloat(document.querySelector(DOMstrings.inputValue).value) // parseFloat convert #
                 }
-        },
-        // Expose selector strings to global scope
-        getDOMstrings: function() {
-            return DOMstrings;
         },
         addListItem: function(obj, type) {
             var html, newHtml, element;
@@ -163,6 +163,23 @@ var UIController = (function() {
             });
             // set focus to first element after input
             fieldsArr[0].focus();
+        },
+        displayBudget: function(obj) {
+            // print 4 peices of data DOM manipulation
+            document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
+            document.querySelector(DOMstrings.incomeLabel).textContent = obj.totalInc;
+            document.querySelector(DOMstrings.expensesLabel).textContent = obj.totalExp;
+            
+            // Show the user the percentage if greater than 0 or dashes when not
+            if (obj.percentage > 0) {
+                document.querySelector(DOMstrings.percentageLabel).textContent = obj.percentage + '%';
+            } else {
+                document.querySelector(DOMstrings.percentageLabel).textContent = '---';
+            }
+        },
+        // Expose selector strings to global scope
+        getDOMstrings: function() {
+            return DOMstrings;
         }
     };
 })();
@@ -192,8 +209,8 @@ var controller = (function(budgetCtrl, UICtrl) {
         budgetCtrl.calculateBudget();
         // Return the budget stored in a variable
         var budget = budgetCtrl.getBudget();
-        // Display budget to UI
-        console.log(budget);
+        // Display returned budget object (above) to UI
+        UICtrl.displayBudget(budget);
     }
 
     // Used in both event listeners, requires seperate function
@@ -219,9 +236,17 @@ var controller = (function(budgetCtrl, UICtrl) {
         }
     };
 
-    // Public initialization function
+    // Page load initialization function
     return {
         init: function() {
+            // Set budget to 0
+            UICtrl.displayBudget({
+                budget: 0,
+                totalInc: 0,
+                totalExp: 0,
+                percentage: 0
+            });
+            // Start event listeners
             setupEventListeners();
         }
     }
