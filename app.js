@@ -112,6 +112,19 @@ var UIController = (function() {
             // Insert HTML into DOM (using incertAdjacent method)
             // Child's of income__list and expense__list
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
+        },
+        clearFields: function() {
+            var fields, fieldsArr;
+            // querySelectorAll method returns a list, not an array
+            fields = document.querySelectorAll(DOMstrings.inputDescription + ', ' + DOMstrings.inputValue);
+            // tricks slice method into returning an array, from something that isn't an array
+            fieldsArr = Array.prototype.slice.call(fields);
+            // current element, current index, current array (fieldsArr)
+            fieldsArr.forEach(function(current, index, array) {
+                current.value = "";
+            });
+            // set focus to first element after input
+            fieldsArr[0].focus();
         }
     };
 })();
@@ -147,6 +160,10 @@ var controller = (function(budgetCtrl, UICtrl) {
 
         // Add new item to UI
         UICtrl.addListItem(newItem, input.type);
+
+        // Clear the fields
+        UICtrl.clearFields();
+
         // Calculate the budget
 
         // Display budget to UI
