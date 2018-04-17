@@ -203,6 +203,13 @@ var UIController = (function() {
             return (type === 'exp' ? '-' : '+') + ' ' + int + '.' + dec;
         };
 
+    // Private function for loop in each iteration calls the callback function 
+    var nodeListForEach = function(list, callback) {
+            for (var i = 0; i < list.length; i++) {
+                callback(list[i], i);
+            }
+        };
+
     // Public function that iffy returns with object assigned to UIController
     return {
         getInput: function() {
@@ -277,19 +284,12 @@ var UIController = (function() {
             // Returns nodeList by selecting all and contains a length property
             var fields = document.querySelectorAll(DOMstrings.expensesPercLabel);
 
-            // For loop in each iteration calls the callback function 
-            var nodeListForEach = function(list, callback) {
-                  for (var i = 0; i < list.length; i++) {
-                      callback(list[i], i);
-                  }
-            };
-
             // nodeListForEach function is passed into the callback parameter
             nodeListForEach(fields, function(current, index) {
                 if (percentages[index] > 0) {
                     current.textContent = percentages[index] + "%";
                 } else {
-                    current.textContent = percentages[index] + "---";
+                    current.textContent = "---";
                 }
             });
         },
@@ -307,6 +307,21 @@ var UIController = (function() {
 
             // months[month] index gives getMonth number and lists what month aligns with index
             document.querySelector(DOMstrings.dateLabel).textContent = months[month] + ' ' + year;
+        },
+
+        // On expense '-' select change styles
+        changedType: function() {
+            var fields = document.querySelectorAll(
+                DOMstrings.inputType + ',' +
+                DOMstrings.inputDescription + ',' +
+                DOMstrings.inputValue);
+
+            nodeListForEach(fields, function(cur) {
+                // Each time type changes we want focus class to change
+                cur.classList.toggle('red-focus');
+            });
+
+            document.querySelector(DOMstrings.inputBtn).classList.toggle('red');
         },
 
         // Expose selector strings to global scope
@@ -327,14 +342,18 @@ var controller = (function(budgetCtrl, UICtrl) {
 
         document.querySelector(DOM.inputBtn).addEventListener('click', ctrlAddItem);
 
-        // Global document event listener
+        // Global document event listener for 'Enter key' to submit item
         document.addEventListener('keypress', function(event) {
             if (event.keyCode === 13 || event.which === 13) {
                 ctrlAddItem();
             }
         });
+
         // DOM was reset in setupEventListeners function
         document.querySelector(DOM.container).addEventListener('click', ctrlDeleteItem);
+
+        // On change select event
+        document.querySelector(DOM.inputType).addEventListener('change', UICtrl.changedType);
     };
 
     // Called each time newItem is entered in UI
@@ -348,7 +367,6 @@ var controller = (function(budgetCtrl, UICtrl) {
     };
 
     var updatePercentages = function() {
-
         // Calculate percentages
         budgetCtrl.calculatePercentages();
 
