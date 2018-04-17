@@ -71,6 +71,25 @@ var budgetController = (function() {
             return newItem;
         },
 
+        deleteItem: function(type, id) {
+            var ids, index;
+
+            // since id's can be deleted we need to locate the index of the id not the id itself
+            // map returns a brand new array with the current id's in the data set
+            ids = data.allItems[type].map(function(current) {
+                return current.id;
+            });
+
+            // returns index of the element with the id we included in the parameter
+            index = ids.indexOf(id);
+
+            // splice removes elements from the array, while slice is used to create a copy
+            // starts removing at number index, and removes just one
+            if (index !== -1) {
+                data.allItems[type].splice(index, 1);
+            }
+        },
+
         calculateBudget: function() {
             // Income plus expense total
             calculateTotal('exp');
@@ -250,10 +269,11 @@ var controller = (function(budgetCtrl, UICtrl) {
             // Split the target HTML "id='inc-0'" into an array ['inc', '0']
             splitID = itemID.split('-');
             type = splitID[0];
-            ID = splitID[1];
+            // Convert string number to integer
+            ID = parseInt(splitID[1]);
 
             // Delete item from global data model
-
+            budgetCtrl.deleteItem(type, ID);
             // Delete item from UI
 
             // Update and show new budget
