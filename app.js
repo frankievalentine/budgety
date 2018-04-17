@@ -171,6 +171,14 @@ var UIController = (function() {
             // Child's of income__list and expense__list
             document.querySelector(element).insertAdjacentHTML('beforeend', newHtml);
         },
+
+        deleteListItem: function(selectorID) {
+            // selectorID we pass in located by going up parentNode, then removing child element
+            // JS can't remove a parent only a child element
+            var el = document.getElementById(selectorID);
+            el.parentNode.removeChild(el);
+        },
+
         clearFields: function() {
             var fields, fieldsArr;
             // querySelectorAll method returns a list, not an array
@@ -184,6 +192,7 @@ var UIController = (function() {
             // set focus to first element after input
             fieldsArr[0].focus();
         },
+
         displayBudget: function(obj) {
             // print 4 peices of data DOM manipulation
             document.querySelector(DOMstrings.budgetLabel).textContent = obj.budget;
@@ -197,6 +206,7 @@ var UIController = (function() {
                 document.querySelector(DOMstrings.percentageLabel).textContent = '---';
             }
         },
+
         // Expose selector strings to global scope
         getDOMstrings: function() {
             return DOMstrings;
@@ -274,12 +284,13 @@ var controller = (function(budgetCtrl, UICtrl) {
 
             // Delete item from global data model
             budgetCtrl.deleteItem(type, ID);
+
             // Delete item from UI
+            UICtrl.deleteListItem(itemID);
 
             // Update and show new budget
-
+            updateBudget();
         }
-
     };
 
     // Page load initialization function
